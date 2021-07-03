@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>加载点位数据</title>
+<style type="text/css">
+    html,
+    body {
+        margin: 0px;
+        height: 100%;
+        width: 100%
+    }
+    
+    .container {
+        width: 100%;
+        height: 100%
+    }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.css">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js"></script>
+<script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+
+
+<body>
+    <div id="map" class="container"></div>
+
+    <script>
+        var map = new maptalks.Map('map', {
+            center: [114.34, 30.45],
+            zoom: 6,
+            baseLayer: new maptalks.TileLayer('base', {
+                urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+                subdomains: ['a', 'b', 'c', 'd'],
+                attribution: '&copy; <a href="http://osm.org">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/">CARTO</a>'
+
+            }),
+            layers: [
+                new maptalks.VectorLayer('v')
+            ]
+        });
+    </script>
+</body>
+
+</html>
+<script>
+    $(function() {
+        //请求参数
+        // var list = {};
+        //
+        $.ajax({
+            //请求方式
+            type: "GET",
+            //请求的媒体类型
+            contentType: "application/json",
+            //请求地址
+            url: "http://47.99.97.22:8089/hyxcy/tasksall",
+            //数据，json字符串
+            data: JSON, //.stringify(list),
+            //请求成功
+            success: function(result) {
+                // alert("上传成功！")
+                console.log(result)
+                    // console.log(result.length);
+                for (var i = 0; i < result.length; i++) {
+                    console.log(result[i].lat + "," + result[i].lon);
+                    var json = {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'Point',
+                            'coordinates': [parseFloat(result[i].lon), parseFloat(result[i].lat)]
+                        },
+                        'properties': {}
+                    };
+                    var marker = maptalks.GeoJSON.toGeometry(json).addTo(map.getLayer('v'));
+                }
+            },
+            //请求失败，包含具体的错误信息
+            error: function(e) {
+                console.log(e);
+                // console.log(e.responseText);
+            }
+        });
+    });
+</script>
